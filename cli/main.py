@@ -17,7 +17,7 @@ db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
 
 print "Retrieving Flights.."
 
-flights = db.view("flight/launch_time_including_payloads", include_docs=True)
+flights = db.view("flight/launch_time_including_payloads", include_docs=True, descending=True, limit=30)
 
 for flight in flights:
    if(flight["doc"]["type"]=="flight"):
