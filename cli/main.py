@@ -35,10 +35,10 @@ payload_id = ids[wanted_id]
 
 udp_socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
 
-while True:http://habitat.habhub.org/habitat/_design/payload_telemetry/_view/flight_payload_time?limit=2&descending=true&include_docs=true&startkey=["(payload_id)","end"]
+while True:
    print "Receiving position.."
    try:
-      //HTTP: 
+      //HTTP: http://habitat.habhub.org/habitat/_design/payload_telemetry/_view/flight_payload_time?limit=2&descending=true&include_docs=true&startkey=["(payload_id)","end"]
       position = db.view("payload_telemetry/flight_payload_time", startkey=[payload_id, "end"], descending=True, limit=1, include_docs=True)
    except:
       db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
