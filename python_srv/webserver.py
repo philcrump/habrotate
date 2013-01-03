@@ -42,10 +42,13 @@ def grab_position(payload_id):
         d = r["doc"]["data"]
     except:
         return "Processing Error"
+    time  = parser.parse(d["_parsed"]["time_parsed"])
+    if d["latitude"] == d["longitude"] == d["altitude"] == 0:
+	return "Fix appears to be invalid: Looks like 0,0,0"
     if d.get("_fix_invalid", False):
         return "Fix info is invalid" + d["_fix_invalid"]
     try:
-	return json.dumps({"latitude": d["latitude"], "longitude": d["longitude"], "altitude": d["altitude"], "sentence_id": d["sentence_id"], "time": d["time"]})
+	return json.dumps({"latitude": d["latitude"], "longitude": d["longitude"], "altitude": d["altitude"], "sentence_id": d["sentence_id"], "time": time})
         #return str(d["latitude"]) + "," + str(d["longitude"]) + "," + str(d["altitude"])
     except KeyError:
         return "Balloon does not have lat/lon/alt"
