@@ -31,14 +31,15 @@ while True:
    try:
       position_data = json.load(urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id)))
    except:
-      print "Error retrieving position, does a position exist?"
-      break
+      print "Invalid JSON received from server, does a position exist?"
 
    try:
       balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
       print "Balloon is at " + repr(balloon) + " Sentence id: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
    except:
-      print "Error retrieving position, does a position exist?"
+      print "Position not received from server."
+	  print position_data
+	  break
 
    #print ("Balloon is at " + repr(balloon) + "Sentence id: " + str(d["sentence_id"]) + " at " + d["time"] + " UTC.")
 
