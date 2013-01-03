@@ -1,6 +1,8 @@
 #Copyright Jon Berg , turtlemeat.com
 
 import string,cgi,time
+from dateutil import parser # required for RFC3339 time
+from operator import itemgetter # required to sort flights by time
 from os import curdir, sep
 from urlparse import urlparse, parse_qsl
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
@@ -19,10 +21,11 @@ def grab_flights():
             flights_op.append(dict())
 	    flights_op[i]["name"] = flight["doc"]["name"]
 	    flights_op[i]["id"] = flight["doc"]["_id"]
+	    flights_op[i]["time"] = time.mktime(parser.parse(flight["doc"]["launch"]["time"]).timetuple())
             i=i+1
             #flights_string += "{0},{2},{1};".format(flight["doc"]["_id"], flight["doc"]["launch"]["time"], flight["doc"]["name"])
     #return flights_string
-    return json.dumps(flights_op)
+    return json.dumps(sorted(flights_op, key=itemgetter('time'), reverse=True))
 
 def grab_position(payload_id):
     db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
@@ -40,7 +43,7 @@ def grab_position(payload_id):
     except:
         return "Processing Error"
     if d.get("_fix_invalid", False):
-        return "Fix info is invalid"
+        return "Fix info is invalid" + d["_fix_invalid"]
     try:
 	return json.dumps({"latitude": d["latitude"], "longitude": d["longitude"], "altitude": d["altitude"], "sentence_id": d["sentence_id"], "time": d["time"]})
         #return str(d["latitude"]) + "," + str(d["longitude"]) + "," + str(d["altitude"])
