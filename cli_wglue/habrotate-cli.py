@@ -7,7 +7,13 @@ import urllib2
 UDP_ADDRESS = "127.0.0.1"
 UDP_PORT = 12000 # Port for pstrotator interface
 
-listener = (51.291436, -1.162357, 200) # G8GTZ
+config_file = open('config.json', 'r')
+config = json.load(config_file)
+config_file.close()
+
+listener = (float(config["station_latitude"]), float(config["station_longitude"]), float(config["station_altitude"]))
+
+print("Receiver Station Location loaded as: " + str(listener))
 
 i=0
 ids=[25]
