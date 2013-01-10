@@ -67,8 +67,8 @@ try:
 		#p["elevation"] = wrap_bearing(p["elevation"])
 		#self.check_range(p)
 		#print p
-		bearing = round(p["bearing"])
-		elevation = round(p["elevation"])
+		bearing = round(p["bearing"],1)
+		elevation = round(p["elevation"],1)
 		distance = round(p["straight_distance"]/1000,1)
 		print("Azimuth: " + str(bearing) + " Elevation: " + str(elevation) + " at " + str(distance) + " km.")
 		udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(bearing) + "</AZIMUTH><ELEVATION>" + str(elevation) + "</ELEVATION></PST>"
