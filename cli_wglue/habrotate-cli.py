@@ -50,13 +50,18 @@ try:
 		try:
 			position_data = json.load(urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id)))
 		except:
-			print "Invalid JSON received from server, does a position exist?"
-
+			print "Invalid JSON received from server. Contact Developer."
+			print urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id)).read()
+			break
+		if "Error" in position_data:
+			print("Server Error: " + str(position_data["Message"]))
+			break
 		try:
 			balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
-			print "Balloon is at " + repr(balloon) + " Sentence id: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
+			print "Found payload " + str(position_data["payload"]) + " at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
-			print "Position not received from server."
+			print "Document Error. Position not received from server."
+			print "DEBUG:"
 			print position_data
 			break
 
