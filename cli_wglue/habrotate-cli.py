@@ -33,9 +33,12 @@ print "Querying flights.."
 flights_data = json.load(urllib2.urlopen('http://py.thecraag.com/flights'))
 
 for flight in flights_data:
-   i=i+1
-   ids.append(flight["id"])
-   print "{0}: {1}".format(i, flight["name"])
+	i=i+1
+	ids.append(flight["id"])
+	if time.strftime("%d:%m", time.gmtime(int(flight["time"]))) == time.strftime("%d:%m", time.gmtime()):
+		print "{0}: {1} - TODAY".format(i, flight["name"])
+	else:
+		print "{0}: {1}".format(i, flight["name"])
 
 wanted_id = int(raw_input('Select Flight number: '))
 flight_id = ids[wanted_id]
