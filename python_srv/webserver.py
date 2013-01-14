@@ -4,7 +4,7 @@ import string,cgi,time
 from dateutil import parser # required for RFC3339 time
 from operator import itemgetter # required to sort flights by time
 from os import curdir, sep
-from urlparse import urlparse, parse_qsl
+from urlparse import urlparse, parse_qs
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 #import pri
 import couchdbkit # habitat interface
@@ -27,31 +27,38 @@ def grab_flights():
     #return flights_string
     return json.dumps(sorted(flights_op, key=itemgetter('time'), reverse=True))
 
-def grab_position(payload_id):
+def grab_position(flight_id):
     db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
-    position = db.view("payload_telemetry/flight_payload_time", startkey=[payload_id, "end"], descending=True, limit=1, include_docs=True)
-    r = list(position)
-    if len(r) != 1 or r[0]["key"][0] != payload_id:
-       return "Could not get balloon position"
+    ## Get a list of the payloads in the flight
+    payloads = dict()
+    flights = db.view("flight/launch_time_including_payloads", include_docs=True, descending=True, limit=10)
+    for flight in flights:
+        if(flight["doc"]["type"]=="flight" and flight["doc"]["_id"]==flight_id):
+            payloads = flight["doc"]["payloads"]
+    #print payloads
+    ## Grab telemetry data for each payload
+    flight_telemetry = []
+    i=0
+    for payload_id in payloads:
+        flight_telemetry.append(dict())
+        telemetry = db.view("payload_telemetry/flight_payload_time", startkey=[flight_id, payload_id], endkey=[flight_id, payload_id,[]], include_docs=True)
+        telemetry_list = list(telemetry)
+        last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["sentence_id"])[-1]
+	flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
+	flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
+	flight_telemetry[i]["altitude"] = last_string["doc"]["data"]["altitude"];
+	flight_telemetry[i]["time"] = last_string["doc"]["data"]["time"];
+	flight_telemetry[i]["sentence_id"] = last_string["doc"]["data"]["sentence_id"];
+	i=i+1
+    ## Get latest timed position
+    latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
+    if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
+       return json.dumps({"Error":"1","Message":"Position appears to be invalid: Looks like 0,0,0"})
     try:
-        r = r[0]
-        t = r["key"][1]
-        #if max_age is not None:
-        #   if abs(time.time() - t) > self.max_age:
-        #      raise ValueError("Position is too old (max_age)")
-        d = r["doc"]["data"]
-    except:
-        return "Processing Error"
-    time  = parser.parse(d["_parsed"]["time_parsed"])
-    if d["latitude"] == d["longitude"] == d["altitude"] == 0:
-	return "Fix appears to be invalid: Looks like 0,0,0"
-    if d.get("_fix_invalid", False):
-        return "Fix info is invalid" + d["_fix_invalid"]
-    try:
-	return json.dumps({"latitude": d["latitude"], "longitude": d["longitude"], "altitude": d["altitude"], "sentence_id": d["sentence_id"], "time": time})
+	return json.dumps({"latitude": latest_telemetry["latitude"], "longitude": latest_telemetry["longitude"], "altitude": latest_telemetry["altitude"], "sentence_id": latest_telemetry["sentence_id"], "payload": "*Not Implemented*", "time": latest_telemetry["time"]})
         #return str(d["latitude"]) + "," + str(d["longitude"]) + "," + str(d["altitude"])
     except KeyError:
-        return "Balloon does not have lat/lon/alt"
+       return json.dumps({"Error":"1","Message":"Position does not have required fields????"})
 
 
 class HTTPHandler(BaseHTTPRequestHandler):
@@ -59,23 +66,24 @@ class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
 	    input = urlparse(self.path)
-            if input.path.endswith("flights"):
+            if input.path.endswith("/flights"):
                 self.send_response(200)
                 self.send_header('Content-type',	'text/html')
                 self.send_header('Access-Control-Allow-Origin',	'http://api.thecraag.com')
                 self.end_headers()
                 self.wfile.write(grab_flights())
                 return
-            if input.path.endswith(""):
+            if input.path.endswith("/position"):
                 self.send_response(200)
                 self.send_header('Content-type',	'text/html')
                 self.send_header('Access-Control-Allow-Origin',	'http://api.thecraag.com')
                 self.end_headers()
 		try:
-		    payload_doc_id = dict(parse_qsl(input.query))['flight_id']
-                    self.wfile.write(grab_position(payload_doc_id))
+		    payload_doc_id = parse_qs(input.query)["flight_id"][0]
                 except:
-                    self.wfile.write("Error: flight id not valid")
+                    self.wfile.write(json.dumps({"Error":"1","Message":"Error Extracting Flight ID from query string."}))
+                    return
+                self.wfile.write(grab_position(payload_doc_id))
                 return
             return
                 
