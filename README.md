@@ -17,6 +17,4 @@ When a flight is selected, it's payload_id is then used to query for the last up
 
 habrotate sends AZ/EL updates to PstRotator's local UDP port. You will need to enable 'UDP Control' in Setup.
 
-## Known Bugs
-
-* Requesting the position of a flight that has no position data will return latest position of most recent flight.
+For more information, see: https://www.thecraag.com/habrotate
