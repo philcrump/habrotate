@@ -43,6 +43,7 @@ def grab_position(flight_id):
     ## Get a list of the payloads in the flight
     payloads = dict()
     flights = db.view("flight/launch_time_including_payloads", include_docs=True, descending=True, limit=10)
+    #print list(flights)
     for flight in flights:
         if(flight["doc"]["type"]=="flight" and flight["doc"]["_id"]==flight_id):
             payloads = flight["doc"]["payloads"]
@@ -61,6 +62,7 @@ def grab_position(flight_id):
 	flight_telemetry[i]["time"] = last_string["doc"]["data"]["time"];
 	flight_telemetry[i]["sentence_id"] = last_string["doc"]["data"]["sentence_id"];
 	i=i+1
+    #print sorted(flight_telemetry, key=lambda x: x["time"])
     ## Get latest timed position
     latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
     if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
