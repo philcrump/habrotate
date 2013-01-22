@@ -41,7 +41,6 @@ def grab_flights():
 def grab_position(flight_id):
     db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
     ## Get a list of the payloads in the flight
-    payloads = dict()
     flights = db.view("flight/launch_time_including_payloads", include_docs=True, descending=True, limit=10)
     #print list(flights)
     for flight in flights:
