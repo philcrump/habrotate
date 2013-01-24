@@ -70,7 +70,7 @@ try:
 			break
 		try:
 			balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
-			print "Found payload " + str(position_data["payload"]) + " at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
+			print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
 			print "Document Error. Position not received from server."
 			print "DEBUG:"
