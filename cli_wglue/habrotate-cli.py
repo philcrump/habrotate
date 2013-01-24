@@ -15,6 +15,7 @@ import earthmaths # Az/El calculations
 import socket # UDP PstRotator interface
 import json
 import urllib2
+import sys
 
 def load_listener_config():
 		config_file = open('config.json', 'r')
@@ -30,12 +31,26 @@ def load_udp_config():
 
 		return (str(config["udp_ip"]), int(config["udp_port"]))
 
+def load_control_config():
+		config_file = open('config.json', 'r')
+		config = json.load(config_file)
+		config_file.close()
+
+		return (int(config["hysteresis"]), int(config["overshoot"]))
 		
 listener = load_listener_config()
 print("Loaded Receiver Station Location: " + str(listener))
 
 udp_config = load_udp_config()
 print("Loaded UDP Configuration: " + str(udp_config))
+
+control_config = load_control_config()
+hysteresis = control_config[0]
+overshoot = control_config[1]
+if overshoot >= hysteresis: #If overshoot is larger than hysteresis we will oscillate
+	print ("Overshoot must be less than the Hysteresis, else oscillation may occur.")
+	sys.exit(0)
+print ("Loaded Control Configuration: Hysteresis = " + str(control_config[0]) + " degrees, Overshoot = " + str(control_config[1]) + " degrees.")
 
 i=0
 ids=[25]
@@ -56,6 +71,9 @@ wanted_id = int(raw_input('Select Flight number: '))
 flight_id = ids[wanted_id]
 
 udp_socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM ) # Open UDP socket
+
+loopcount = 0
+update_rotator = 0
 try:
 	while True:
 		print "Querying position.."
@@ -87,9 +105,34 @@ try:
 		bearing = round(p["bearing"])
 		elevation = round(p["elevation"])
 		distance = round(p["straight_distance"]/1000,1)
-		print("Azimuth: " + str(bearing) + " Elevation: " + str(elevation) + " at " + str(distance) + " km.")
-		udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(bearing) + "</AZIMUTH><ELEVATION>" + str(elevation) + "</ELEVATION></PST>"
-		udp_socket.sendto(udp_string, udp_config)
+		print("Balloon Azimuth: " + str(bearing) + " Elevation: " + str(elevation) + " at " + str(distance) + " km.")
+		if loopcount == 0: #Set rotator on first loop
+			print ("Pointing Rotator.")
+			rotator_bearing = bearing
+			rotator_elevation = elevation
+			udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
+			udp_socket.sendto(udp_string, udp_config)
+		else:
+			if bearing > (rotator_bearing + hysteresis):
+				rotator_bearing = (bearing + overshoot)%360
+				update_rotator = 1
+			elif bearing < (rotator_bearing - hysteresis):
+				rotator_bearing = (bearing - overshoot)%360
+				update_rotator = 1
+			if elevation > (rotator_elevation + hysteresis):
+				rotator_elevation = elevation + overshoot
+				update_rotator = 1
+			elif elevation < (rotator_elevation - hysteresis):
+				rotator_elevation = elevation - overshoot
+				update_rotator = 1
+			if update_rotator == 1:
+				update_rotator = 0
+				print("Moving rotator to Azimuth: " + str(rotator_bearing) + " Elevation: " + str(rotator_elevation))
+				udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
+				udp_socket.sendto(udp_string, udp_config)
+			else:
+				print ("Current Rotator error: Azimuth: " + str(rotator_bearing-bearing) + " Elevation: " + str(rotator_elevation-elevation))
 		time.sleep(10)
+		loopcount+=1
 except KeyboardInterrupt:
         print '^C received, Shutting down.'
