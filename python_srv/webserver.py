@@ -97,7 +97,9 @@ class HTTPHandler(BaseHTTPRequestHandler):
                 except:
                     self.wfile.write(json.dumps({"Error":"1","Message":"Error Extracting Flight ID from query string."}))
                     return
-                self.wfile.write(grab_position(payload_doc_id))
+		content = grab_position(payload_doc_id)
+		print content
+                self.wfile.write(content)
                 return
             return
                 
