@@ -5,5 +5,5 @@
 "udp_ip": "127.0.0.1",
 "udp_port": "12000",
 "hysteresis": "5",
-"overshoot": "2"
+"overshoot": "3"
 }
