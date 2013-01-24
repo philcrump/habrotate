@@ -55,7 +55,7 @@ def grab_position(flight_id):
         telemetry = db.view("payload_telemetry/flight_payload_time", startkey=[flight_id, payload_id], endkey=[flight_id, payload_id,[]], include_docs=True)
         telemetry_list = list(telemetry)
 	if len(telemetry_list)==0:
-		return json.dumps({"Error":"1","Message":"Flight has no telemetry data."})
+	    continue
         last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["sentence_id"])[-1]
 	flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
 	flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
@@ -65,7 +65,10 @@ def grab_position(flight_id):
 	i=i+1
     #print sorted(flight_telemetry, key=lambda x: x["time"])
     ## Get latest timed position
-    latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
+    try:
+        latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
+    except KeyError:
+        return json.dumps({"Error":"1","Message":"Flight has no telemetry data."})
     if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
        return json.dumps({"Error":"1","Message":"Position appears to be invalid: Looks like 0,0,0"})
     try:
