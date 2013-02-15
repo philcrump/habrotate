@@ -51,11 +51,11 @@ def grab_position(flight_id):
     flight_telemetry = []
     i=0
     for payload_id in payloads:
-        flight_telemetry.append(dict())
         telemetry = db.view("payload_telemetry/flight_payload_time", startkey=[flight_id, payload_id], endkey=[flight_id, payload_id,[]], include_docs=True)
         telemetry_list = list(telemetry)
 	if len(telemetry_list)==0:
 	    continue
+        flight_telemetry.append(dict())
         last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["sentence_id"])[-1]
 	flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
 	flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
