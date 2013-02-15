@@ -30,12 +30,12 @@ try:
 	config_file = open('config.json', 'r')
 except:
 	print "Config File 'config.json' does not exist in applicaton directory."
-	break
+	sys.exit(1)
 try:
 	config_json = json.load(config_file)
 except:
 	print "Syntax Error in config.json file."
-	break
+	sys.exit(1)
 
 config_file.close()
 
@@ -62,14 +62,14 @@ try:
 	flights_json = urllib2.urlopen('http://py.thecraag.com/flights')
 except:
 	print "thecraag.com HTTP Connection Error."
-	break
+	sys.exit(1)
 
 try:
 	flights_data = json.load(flights_json)
 except:
 	print "Invalid JSON returned from Server."
 	print flights_json
-	break
+	sys.exit(1)
 
 for flight in flights_data:
 	i=i+1
@@ -94,10 +94,10 @@ try:
 		except:
 			print "Invalid JSON received from server. Contact Developer."
 			print urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id)).read()
-			break
+			sys.exit(1)
 		if "Error" in position_data:
 			print("Server Error: " + str(position_data["Message"]))
-			break
+			sys.exit(1)
 		try:
 			balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
 			print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
@@ -105,7 +105,7 @@ try:
 			print "Document Error. Position not received from server."
 			print "DEBUG:"
 			print position_data
-			break
+			sys.exit(1)
 
 		#print ("Balloon is at " + repr(balloon) + "Sentence id: " + str(d["sentence_id"]) + " at " + d["time"] + " UTC.")
 
