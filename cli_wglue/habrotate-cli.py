@@ -50,7 +50,7 @@ hysteresis = control_config[0]
 overshoot = control_config[1]
 if overshoot >= hysteresis: #If overshoot is larger than hysteresis we will oscillate
 	print ("Overshoot must be less than the Hysteresis, else oscillation may occur.")
-	sys.exit(0)
+	sys.exit(1)
 print ("Loaded Control Configuration: Hysteresis = " + str(control_config[0]) + " degrees, Overshoot = " + str(control_config[1]) + " degrees.")
 
 i=0
