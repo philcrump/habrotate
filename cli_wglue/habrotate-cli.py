@@ -29,7 +29,7 @@ def load_control_config(config):
 try:		
 	config_file = open('config.json', 'r')
 except:
-	print "Config File 'config.json' does not exist in applicaton directory."
+	print "Config File 'config.json' does not exist in application directory."
 	sys.exit(1)
 try:
 	config_json = json.load(config_file)
