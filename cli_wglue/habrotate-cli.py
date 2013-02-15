@@ -17,34 +17,35 @@ import json
 import urllib2
 import sys
 
-def load_listener_config():
-		config_file = open('config.json', 'r')
-		config = json.load(config_file)
-		config_file.close()
-
+def load_listener_config(config):
 		return (float(config["station_latitude"]), float(config["station_longitude"]), float(config["station_altitude"]))
 
-def load_udp_config():
-		config_file = open('config.json', 'r')
-		config = json.load(config_file)
-		config_file.close()
-
+def load_udp_config(config):
 		return (str(config["udp_ip"]), int(config["udp_port"]))
 
-def load_control_config():
-		config_file = open('config.json', 'r')
-		config = json.load(config_file)
-		config_file.close()
-
+def load_control_config(config):
 		return (int(config["hysteresis"]), int(config["overshoot"]))
-		
-listener = load_listener_config()
+
+try:		
+	config_file = open('config.json', 'r')
+except:
+	print "Config File 'config.json' does not exist in applicaton directory."
+	break
+try:
+	config_json = json.load(config_file)
+except:
+	print "Syntax Error in config.json file."
+	break
+
+config_file.close(config_json)
+
+listener = load_listener_config(config_json)
 print("Loaded Receiver Station Location: " + str(listener))
 
-udp_config = load_udp_config()
+udp_config = load_udp_config(config_json)
 print("Loaded UDP Configuration: " + str(udp_config))
 
-control_config = load_control_config()
+control_config = load_control_config(config_json)
 hysteresis = control_config[0]
 overshoot = control_config[1]
 if overshoot >= hysteresis: #If overshoot is larger than hysteresis we will oscillate
