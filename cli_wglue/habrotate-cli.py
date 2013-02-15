@@ -57,7 +57,18 @@ ids=[25]
 
 print "Querying flights.."
 
-flights_data = json.load(urllib2.urlopen('http://py.thecraag.com/flights'))
+try:
+	flights_json = urllib2.urlopen('http://py.thecraag.com/flights')
+except:
+	print "thecraag.com HTTP Connection Error."
+	break
+
+try:
+	flights_data = json.load(flights_json)
+except:
+	print "Invalid JSON returned from Server."
+	print flights_json
+	break
 
 for flight in flights_data:
 	i=i+1
