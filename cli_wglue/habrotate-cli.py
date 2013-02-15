@@ -37,7 +37,7 @@ except:
 	print "Syntax Error in config.json file."
 	break
 
-config_file.close(config_json)
+config_file.close()
 
 listener = load_listener_config(config_json)
 print("Loaded Receiver Station Location: " + str(listener))
