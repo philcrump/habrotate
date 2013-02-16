@@ -10,6 +10,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
+print "##### HABrotate ####"
+
 import time # For delays
 import earthmaths # Az/El calculations
 import socket # UDP PstRotator interface
