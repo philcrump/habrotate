@@ -86,6 +86,7 @@ def grab_position(flight_id):
 		flight_telemetry[i]["altitude"] = last_string["doc"]["data"]["altitude"];
 		flight_telemetry[i]["time"] = last_string["doc"]["data"]["time"];
 		flight_telemetry[i]["sentence_id"] = last_string["doc"]["data"]["sentence_id"];
+		flight_telemetry[i]["payload"] = last_string["doc"]["data"]["payload"];
 		i=i+1
 	#print sorted(flight_telemetry, key=lambda x: x["time"])
 	## Get latest timed position
@@ -97,7 +98,7 @@ def grab_position(flight_id):
 	if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
 		return {"Error":"1","Message":"Position appears to be invalid: Looks like 0,0,0"}
 	try:
-		return {"latitude": latest_telemetry["latitude"], "longitude": latest_telemetry["longitude"], "altitude": latest_telemetry["altitude"], "sentence_id": latest_telemetry["sentence_id"], "payload": "*Not Implemented*", "time": latest_telemetry["time"]}
+		return {"latitude": latest_telemetry["latitude"], "longitude": latest_telemetry["longitude"], "altitude": latest_telemetry["altitude"], "sentence_id": latest_telemetry["sentence_id"], "payload": latest_telemetry["payload"], "time": latest_telemetry["time"]}
 		#return str(d["latitude"]) + "," + str(d["longitude"]) + "," + str(d["altitude"])
 	except KeyError:
 		return {"Error":"1","Message":"Position does not have required fields????"}
@@ -176,7 +177,7 @@ try:
 			if "Not launched" in position_data: # No telemetry data, position is launch site
 				print "Found Launch site at " + repr(balloon) + ". Balloon position will be used as soon as it is uploaded."
 			else:
-				print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
+				print 'Found "' + position_data["payload"] + '" at ' + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
 			print "ERROR: Document Parsing Error:", exc_info()[0]
 			print "DEBUG info:"
