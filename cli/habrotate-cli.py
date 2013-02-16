@@ -51,6 +51,16 @@ def grab_flights():
 	#return flights_string
 	return sorted(flights_op, key=itemgetter('time'), reverse=True)
 	
+def grab_launch_position(flight_id):
+	## Get a list of the payloads in the flight
+	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=8')
+	flights = load(flights_json)['rows']
+	#print list(flights)
+	for flight in flights:
+		if(flight["doc"]["type"]=="flight" and flight["doc"]["_id"]==flight_id):
+			launch_location = flight["doc"]["launch"]["location"]
+	return launch_location
+	
 def grab_position(flight_id):
 	## Get a list of the payloads in the flight
 	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=8')
@@ -81,8 +91,9 @@ def grab_position(flight_id):
 	## Get latest timed position
 	try:
 		latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
-	except KeyError, IndexError:
-		return {"Error":"1","Message":"Flight has no telemetry data."}
+	except (KeyError, IndexError):
+		launch_location = grab_launch_position(flight_id)
+		return {"Not launched": "1", "latitude": launch_location["latitude"], "longitude": launch_location["longitude"], "altitude": launch_location["altitude"]}
 	if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
 		return {"Error":"1","Message":"Position appears to be invalid: Looks like 0,0,0"}
 	try:
@@ -159,9 +170,13 @@ try:
 		if "Error" in position_data:
 			print("ERROR: " + str(position_data["Message"]))
 			exit(1)
+		
 		try:
 			balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
-			print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
+			if "Not launched" in position_data: # No telemetry data, position is launch site
+				print "Found Launch site at " + repr(balloon) + ". Balloon position will be used as soon as it is uploaded."
+			else:
+				print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
 			print "ERROR: Document Parsing Error:", exc_info()[0]
 			print "DEBUG info:"
