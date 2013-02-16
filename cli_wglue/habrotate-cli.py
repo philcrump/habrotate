@@ -31,12 +31,12 @@ def load_control_config(config):
 try:		
 	config_file = open('config.json', 'r')
 except IOError:
-	print "Config File 'config.json' does not exist in application directory."
+	print "ERROR: Config File 'config.json' does not exist in application directory."
 	sys.exit(1)
 try:
 	config_json = json.load(config_file)
 except:
-	print "Syntax Error in config.json file."
+	print "ERROR: Syntax Error in config.json file."
 	sys.exit(1)
 
 config_file.close()
@@ -51,7 +51,7 @@ control_config = load_control_config(config_json)
 hysteresis = control_config[0]
 overshoot = control_config[1]
 if overshoot >= hysteresis: #If overshoot is larger than hysteresis we will oscillate
-	print ("Overshoot must be less than the Hysteresis, else oscillation may occur.")
+	print ("ERROR: Overshoot must be less than the Hysteresis, else oscillation may occur.")
 	sys.exit(1)
 print ("Loaded Control Configuration: Hysteresis = " + str(control_config[0]) + " degrees, Overshoot = " + str(control_config[1]) + " degrees.")
 
@@ -63,13 +63,13 @@ print "Querying flights.."
 try:
 	flights_json = urllib2.urlopen('http://py.thecraag.com/flights')
 except:
-	print "thecraag.com HTTP Connection Error: ", sys.exc_info()[0]
+	print "ERROR: thecraag.com HTTP Connection Error: ", sys.exc_info()[0]
 	sys.exit(1)
 
 try:
 	flights_data = json.load(flights_json)
 except:
-	print "Invalid JSON returned from Server: ", sys.exc_info()[0]
+	print "ERROR: Invalid JSON returned from Server: ", sys.exc_info()[0]
 	sys.exit(1)
 
 for flight in flights_data:
@@ -104,24 +104,24 @@ try:
 		try:
 			position_json = urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id))
 		except:
-			print "thecraag.com HTTP Connection Error: ", sys.exc_info()[0]
+			print "ERROR: thecraag.com HTTP Connection Error: ", sys.exc_info()[0]
 			sys.exit(1)
 		try:
 			position_data = json.load(position_json)
 		except:
-			print "Invalid JSON received from server. Contact Developer. ", sys.exc_info()[0]
+			print "ERROR: Invalid JSON received from server. Contact Developer. ", sys.exc_info()[0]
 			print urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id)).read()
 			sys.exit(1)
 
 		if "Error" in position_data:
-			print("Server Error: " + str(position_data["Message"]))
+			print("ERROR: Server Error: " + str(position_data["Message"]))
 			sys.exit(1)
 		try:
 			balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
 			print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
-			print "Document Parsing Error:", sys.exc_info()[0]
-			print "DEBUG:"
+			print "ERROR: Document Parsing Error:", sys.exc_info()[0]
+			print "DEBUG info:"
 			print position_data
 			sys.exit(1)
 
