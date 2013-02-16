@@ -68,6 +68,7 @@ def grab_position(flight_id):
     try:
         latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
     except KeyError:
+	print flight_telemetry
         return json.dumps({"Error":"1","Message":"Flight has no telemetry data."})
     if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
        return json.dumps({"Error":"1","Message":"Position appears to be invalid: Looks like 0,0,0"})
