@@ -79,8 +79,19 @@ for flight in flights_data:
 	else:
 		print "{0}: {1}".format(i, flight["name"])
 
-wanted_id = int(raw_input('Select Flight number: '))
-flight_id = ids[wanted_id]
+valid_input = False
+while not valid_input:
+	try:
+		wanted_id = int(raw_input('Select Flight number: '))
+		if wanted_id==0:
+			raise IndexError
+		flight_id = ids[wanted_id]
+		valid_input = True
+	except ValueError:
+		print "Input not an integer, please try again:"
+	except IndexError:
+		print "Input out of range, please try again:"
+
 
 udp_socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM ) # Open UDP socket
 
