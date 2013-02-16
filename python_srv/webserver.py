@@ -51,7 +51,7 @@ def grab_position(flight_id):
     flight_telemetry = []
     i=0
     for payload_id in payloads:
-        telemetry = db.view("payload_telemetry/flight_payload_time", startkey=[flight_id, payload_id], endkey=[flight_id, payload_id,[]], include_docs=True)
+        telemetry = db.view("payload_telemetry/flight_payload_time", startkey=[flight_id, payload_id,[]], endkey=[flight_id, payload_id], descending=True, limit=1 include_docs=True)
         telemetry_list = list(telemetry)
 	if len(telemetry_list)==0:
 	    continue
