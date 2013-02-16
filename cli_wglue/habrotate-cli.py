@@ -10,7 +10,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-print "##### HABrotate ####"
+print "##### HABrotate #####"
 
 from time import sleep, gmtime, strftime # For delays
 import earthmaths # Az/El calculations
@@ -28,6 +28,8 @@ def load_udp_config(config):
 def load_control_config(config):
 		return (int(config["hysteresis"]), int(config["overshoot"]))
 
+print "Parsing config.json.."
+		
 try:		
 	config_file = open('config.json', 'r')
 except IOError:
@@ -42,10 +44,10 @@ except:
 config_file.close()
 
 listener = load_listener_config(config_json)
-print("Loaded Receiver Station Location: " + str(listener))
+print("Receiver Station Location: Lat: " + str(listener[0]) + " Lon: " + str(listener[1]) + " Altitude: " + str(listener[2]))
 
 udp_config = load_udp_config(config_json)
-print("Loaded UDP Configuration: " + str(udp_config))
+print("UDP Configuration: IP: " + str(udp_config[0]) + " Port: " + str(udp_config[1]))
 
 control_config = load_control_config(config_json)
 hysteresis = control_config[0]
@@ -53,7 +55,7 @@ overshoot = control_config[1]
 if overshoot >= hysteresis: #If overshoot is larger than hysteresis we will oscillate
 	print ("ERROR: Overshoot must be less than the Hysteresis, else oscillation may occur.")
 	exit(1)
-print ("Loaded Control Configuration: Hysteresis = " + str(control_config[0]) + " degrees, Overshoot = " + str(control_config[1]) + " degrees.")
+print ("Control Configuration: Hysteresis = " + str(control_config[0]) + " degrees, Overshoot = " + str(control_config[1]) + " degrees.")
 
 i=0
 ids=[25]
