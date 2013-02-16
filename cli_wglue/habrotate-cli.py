@@ -12,12 +12,12 @@
 
 print "##### HABrotate ####"
 
-import time # For delays
+from time import sleep, gmtime, strftime # For delays
 import earthmaths # Az/El calculations
-import socket # UDP PstRotator interface
-import json
-import urllib2
-import sys
+from socket import socket, AF_INET, SOCK_DGRAM # UDP PstRotator interface
+from json import load
+from urllib2 import urlopen
+from sys import exit, exc_info
 
 def load_listener_config(config):
 		return (float(config["station_latitude"]), float(config["station_longitude"]), float(config["station_altitude"]))
@@ -32,12 +32,12 @@ try:
 	config_file = open('config.json', 'r')
 except IOError:
 	print "ERROR: Config File 'config.json' does not exist in application directory."
-	sys.exit(1)
+	exit(1)
 try:
-	config_json = json.load(config_file)
+	config_json = load(config_file)
 except:
 	print "ERROR: Syntax Error in config.json file."
-	sys.exit(1)
+	exit(1)
 
 config_file.close()
 
@@ -52,7 +52,7 @@ hysteresis = control_config[0]
 overshoot = control_config[1]
 if overshoot >= hysteresis: #If overshoot is larger than hysteresis we will oscillate
 	print ("ERROR: Overshoot must be less than the Hysteresis, else oscillation may occur.")
-	sys.exit(1)
+	exit(1)
 print ("Loaded Control Configuration: Hysteresis = " + str(control_config[0]) + " degrees, Overshoot = " + str(control_config[1]) + " degrees.")
 
 i=0
@@ -61,21 +61,21 @@ ids=[25]
 print "Querying flights.."
 
 try:
-	flights_json = urllib2.urlopen('http://py.thecraag.com/flights')
+	flights_json = urlopen('http://py.thecraag.com/flights')
 except:
-	print "ERROR: thecraag.com HTTP Connection Error: ", sys.exc_info()[0]
-	sys.exit(1)
+	print "ERROR: thecraag.com HTTP Connection Error: ", exc_info()[0]
+	exit(1)
 
 try:
-	flights_data = json.load(flights_json)
+	flights_data = load(flights_json)
 except:
-	print "ERROR: Invalid JSON returned from Server: ", sys.exc_info()[0]
-	sys.exit(1)
+	print "ERROR: Invalid JSON returned from Server: ", exc_info()[0]
+	exit(1)
 
 for flight in flights_data:
 	i=i+1
 	ids.append(flight["id"])
-	if time.strftime("%d:%m", time.gmtime(int(flight["time"]))) == time.strftime("%d:%m", time.gmtime()):
+	if strftime("%d:%m", gmtime(int(flight["time"]))) == strftime("%d:%m", gmtime()):
 		print "{0}: {1} - TODAY".format(i, flight["name"])
 	else:
 		print "{0}: {1}".format(i, flight["name"])
@@ -94,7 +94,7 @@ while not valid_input:
 		print "Input out of range, please try again:"
 
 
-udp_socket = socket.socket( socket.AF_INET, socket.SOCK_DGRAM ) # Open UDP socket
+udp_socket = socket( AF_INET, SOCK_DGRAM ) # Open UDP socket
 
 loopcount = 0
 update_rotator = 0
@@ -102,28 +102,28 @@ try:
 	while True:
 		print "Querying position.."
 		try:
-			position_json = urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id))
+			position_json = urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id))
 		except:
-			print "ERROR: thecraag.com HTTP Connection Error: ", sys.exc_info()[0]
-			sys.exit(1)
+			print "ERROR: thecraag.com HTTP Connection Error: ", exc_info()[0]
+			exit(1)
 		try:
-			position_data = json.load(position_json)
+			position_data = load(position_json)
 		except:
-			print "ERROR: Invalid JSON received from server. Contact Developer. ", sys.exc_info()[0]
+			print "ERROR: Invalid JSON received from server. Contact Developer. ", exc_info()[0]
 			print urllib2.urlopen('http://py.thecraag.com/position?flight_id=' + str(flight_id)).read()
-			sys.exit(1)
+			exit(1)
 
 		if "Error" in position_data:
 			print("ERROR: Server Error: " + str(position_data["Message"]))
-			sys.exit(1)
+			exit(1)
 		try:
 			balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
 			print "Found payload at " + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
-			print "ERROR: Document Parsing Error:", sys.exc_info()[0]
+			print "ERROR: Document Parsing Error:", exc_info()[0]
 			print "DEBUG info:"
 			print position_data
-			sys.exit(1)
+			exit(1)
 
 		#print ("Balloon is at " + repr(balloon) + "Sentence id: " + str(d["sentence_id"]) + " at " + d["time"] + " UTC.")
 
@@ -163,7 +163,7 @@ try:
 			udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
 			udp_socket.sendto(udp_string, udp_config)
 		print("Pausing for 10s...")
-		time.sleep(10)
+		sleep(10)
 		loopcount+=1
 except KeyboardInterrupt:
         print '^C received, Shutting down.'
