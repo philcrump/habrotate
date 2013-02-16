@@ -26,6 +26,7 @@ def grab_flights():
     flights_string=''
     flights_op = []
     db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
+    ## http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=10
     flights = db.view("flight/launch_time_including_payloads", include_docs=True, descending=True, limit=10)
     for flight in flights:
         if(flight["doc"]["type"]=="flight"):
@@ -41,6 +42,7 @@ def grab_flights():
 def grab_position(flight_id):
     db = couchdbkit.Server("http://habitat.habhub.org")["habitat"]
     ## Get a list of the payloads in the flight
+    ## http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=10
     flights = db.view("flight/launch_time_including_payloads", include_docs=True, descending=True, limit=10)
     #print list(flights)
     for flight in flights:
@@ -51,6 +53,7 @@ def grab_position(flight_id):
     flight_telemetry = []
     i=0
     for payload_id in payloads:
+    	## http://habitat.habhub.org/habitat/_design/payload_telemetry/_view/flight_payload_time?startkey=["flight_id","payload_id",[]]&endkey=["flight_id","payload_id"]&include_docs=True&descending=True&limit=1
         telemetry = db.view("payload_telemetry/flight_payload_time", startkey=[flight_id, payload_id, []], endkey=[flight_id, payload_id], descending=True, limit=1, include_docs=True)
         telemetry_list = list(telemetry)
 	if len(telemetry_list)==0:
