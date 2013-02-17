@@ -30,6 +30,10 @@ def load_udp_config(config):
 def load_control_config(config):
 		return (int(config["hysteresis"]), int(config["overshoot"]))
 
+def google_elevation(lat, lon):
+	elevation_json = urlopen('http://maps.googleapis.com/maps/api/elevation/json?locations=' + str(lat) + ',' + str(lon) + '&sensor=true')
+	return round(load(elevation_json)['results'][0]['elevation'])
+
 def grab_flights():
 	i=0
 	flights_string=''
@@ -59,6 +63,10 @@ def grab_launch_position(flight_id):
 	for flight in flights:
 		if(flight["doc"]["type"]=="flight" and flight["doc"]["_id"]==flight_id):
 			launch_location = flight["doc"]["launch"]["location"]
+	if "altitude" in launch_location:
+		pass
+	else:
+		launch_location["altitude"] = google_elevation(launch_location["latitude"],launch_location["longitude"])
 	return launch_location
 	
 def grab_position(flight_id):
