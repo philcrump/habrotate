@@ -22,7 +22,11 @@ from sys import exit, exc_info
 from operator import itemgetter
 
 def load_listener_config(config):
-		return (float(config["station_latitude"]), float(config["station_longitude"]), float(config["station_altitude"]))
+		if config["station_altitude"]=="auto":
+			station_alt = google_elevation(float(config["station_latitude"]), float(config["station_longitude"]))
+			return (float(config["station_latitude"]), float(config["station_longitude"]), float(station_alt))
+		else:
+			return (float(config["station_latitude"]), float(config["station_longitude"]), float(config["station_altitude"]))
 
 def load_udp_config(config):
 		return (str(config["udp_ip"]), int(config["udp_port"]))
