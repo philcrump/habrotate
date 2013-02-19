@@ -229,10 +229,10 @@ try:
 			if update_rotator == 1:
 				update_rotator = 0
 				print("Moving rotator to Azimuth: " + str(rotator_bearing) + " Elevation: " + str(rotator_elevation))
+				udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
+				udp_socket.sendto(udp_string, udp_config)
 			else:
 				print ("Current Rotator error: Azimuth: " + str(rotator_bearing-bearing) + " Elevation: " + str(rotator_elevation-elevation))
-			udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
-			udp_socket.sendto(udp_string, udp_config)
 		print("Pausing for 10s...")
 		sleep(10)
 		loopcount+=1
