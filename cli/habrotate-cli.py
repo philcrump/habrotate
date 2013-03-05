@@ -12,7 +12,7 @@
 
 print "##### HABrotate #####"
 
-from time import sleep, gmtime, strftime, mktime # For delays
+from time import sleep, gmtime, strftime, mktime, time # For delays
 import earthmaths # Az/El calculations
 from socket import socket, AF_INET, SOCK_DGRAM # UDP PstRotator interface
 from dateutil import parser
@@ -43,7 +43,7 @@ def grab_flights():
 	flights_string=''
 	flights_op = []
 	try:
-		flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=18')
+		flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True&descending=True&limit=18')
 	except:
 		print "ERROR: Habitat HTTP Connection Error: ", exc_info()[0]
 		exit(1)
@@ -61,7 +61,7 @@ def grab_flights():
 	
 def grab_launch_position(flight_id):
 	## Get a list of the payloads in the flight
-	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=18')
+	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True&descending=True&limit=18')
 	flights = load(flights_json)['rows']
 	#print list(flights)
 	for flight in flights:
@@ -75,7 +75,7 @@ def grab_launch_position(flight_id):
 	
 def grab_position(flight_id):
 	## Get a list of the payloads in the flight
-	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?include_docs=True&descending=True&limit=18')
+	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True&descending=True&limit=18')
 	flights = load(flights_json)['rows']
 	#print list(flights)
 	for flight in flights:
