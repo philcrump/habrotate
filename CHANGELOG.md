@@ -4,6 +4,7 @@ HABrotate Changelog
 ## 0.5.3-dev
 
 * Fixed a bug that caused a crash if Unicode was used in a flight name (Reported by Geoff G8DHE)
+* Remove debug print when querying position
 * Removed obselete code directories from git
 
 ## 0.5.2 (March 5, 2013)
