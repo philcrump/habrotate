@@ -92,6 +92,8 @@ def grab_position(flight_id):
 		if len(telemetry_list)==0:
 			continue
 		flight_telemetry.append(dict())
+		for rowid in telemetry_list:
+		    print rowid["doc"]["data"]
 		last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["sentence_id"])[-1]
 		flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
 		flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
@@ -153,9 +155,9 @@ for flight in grab_flights():
 	i=i+1
 	ids.append(flight["id"])
 	if strftime("%d:%m", gmtime(int(flight["time"]))) == strftime("%d:%m", gmtime()):
-		print "{0}: {1} - TODAY".format(i, flight["name"])
+		print "{0}: {1} - TODAY".format(i, flight["name"].encode('utf-8'))
 	else:
-		print "{0}: {1}".format(i, flight["name"])
+		print "{0}: {1}".format(i, flight["name"].encode('utf-8'))
 
 valid_input = False
 while not valid_input:
@@ -189,7 +191,7 @@ try:
 			if "Not launched" in position_data: # No telemetry data, position is launch site
 				print "Found Launch site at " + repr(balloon) + ". Balloon position will be used as soon as it is uploaded."
 			else:
-				print 'Found "' + position_data["payload"] + '" at ' + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
+				print 'Found "' + position_data["payload"].encode('utf-8') + '" at ' + repr(balloon) + " Sentence: " + str(position_data["sentence_id"]) + " at " + position_data["time"] + " UTC."
 		except:
 			print "ERROR: Document Parsing Error:", exc_info()[0]
 			print "DEBUG info:"
