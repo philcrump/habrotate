@@ -17,4 +17,4 @@ When a flight is selected, it's payload_id is then used to query for the last up
 
 habrotate sends AZ/EL updates to PstRotator's local UDP port. You will need to enable 'UDP Control' in Setup.
 
-For more information, see: https://www.thecraag.com/habrotate
+For more information, see: https://www.philcrump.co.uk/habrotate
