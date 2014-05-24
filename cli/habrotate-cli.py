@@ -92,8 +92,8 @@ def grab_position(flight_id):
 		if len(telemetry_list)==0:
 			continue
 		flight_telemetry.append(dict())
-		for rowid in telemetry_list:
-		    print rowid["doc"]["data"]
+		#for rowid in telemetry_list:
+		#    print rowid["doc"]["data"]
 		last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["sentence_id"])[-1]
 		flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
 		flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
