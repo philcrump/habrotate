@@ -43,7 +43,7 @@ def grab_flights():
 	flights_string=''
 	flights_op = []
 	try:
-		flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True&descending=True&limit=18')
+		flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())+(24*3600)) + ']&include_docs=True&descending=True&limit=18')
 	except:
 		print "ERROR: Habitat HTTP Connection Error: ", exc_info()[0]
 		exit(1)
