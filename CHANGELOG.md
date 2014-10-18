@@ -1,6 +1,12 @@
 HABrotate Changelog
 =================
 
+## 0.6 (18 Oct, 2014)
+
+* Flights List now displays all flights with a valid Flight Doc Window
+* Small text output changes
+* Whitespace cleanup
+
 ## 0.5.3 (June 2, 2014)
 
 * Fixed a bug that caused a crash if Unicode was used in a flight name (Reported by Geoff G8DHE)
