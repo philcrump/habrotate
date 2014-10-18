@@ -210,9 +210,9 @@ try:
 		distance = round(p["straight_distance"]/1000,1)
 		print("Balloon Azimuth: " + str(bearing) + " Elevation: " + str(elevation) + " at " + str(distance) + " km.")
 		if loopcount == 0: #Set rotator on first loop
-			print ("Pointing Rotator.")
 			rotator_bearing = bearing
 			rotator_elevation = elevation
+		    print("Moving rotator to Azimuth: " + str(rotator_bearing) + " Elevation: " + str(rotator_elevation))
 			udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
 			udp_socket.sendto(udp_string, udp_config)
 		else:
