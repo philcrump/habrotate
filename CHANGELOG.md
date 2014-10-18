@@ -1,6 +1,11 @@
 HABrotate Changelog
 =================
 
+## 0.6.1 (18 Oct, 2014)
+
+* Last position being invalid prompts a search for last valid position in the last 200 strings on habitat
+* Less errors are fatal
+
 ## 0.6 (18 Oct, 2014)
 
 * Flights List now displays all flights with a valid Flight Doc Window
