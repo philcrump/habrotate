@@ -234,7 +234,7 @@ try:
 				udp_string = "<PST><TRACK>0</TRACK><AZIMUTH>" + str(rotator_bearing) + "</AZIMUTH><ELEVATION>" + str(rotator_elevation) + "</ELEVATION></PST>"
 				udp_socket.sendto(udp_string, udp_config)
 			else:
-				print ("Current Rotator error: Azimuth: " + str(rotator_bearing-bearing) + " Elevation: " + str(rotator_elevation-elevation))
+				print ("Current Rotator offset: Azimuth: " + str(rotator_bearing-bearing) + " Elevation: " + str(rotator_elevation-elevation))
 		print("Pausing for 10s...")
 		sleep(10)
 		loopcount+=1
