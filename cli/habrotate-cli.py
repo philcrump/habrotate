@@ -63,7 +63,6 @@ def grab_launch_position(flight_id):
     ## Get a list of the payloads in the flight
     flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/end_start_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True')
     flights = load(flights_json)['rows']
-    #print list(flights)
     for flight in flights:
         if(flight["doc"]["type"]=="flight" and flight["doc"]["_id"]==flight_id):
             launch_location = flight["doc"]["launch"]["location"]
@@ -77,7 +76,6 @@ def grab_position(flight_id):
     ## Get a list of the payloads in the flight
     flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/end_start_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True')
     flights = load(flights_json)['rows']
-    #print list(flights)
     for flight in flights:
         if(flight["doc"]["type"]=="flight" and flight["doc"]["_id"]==flight_id):
             payloads = flight["doc"]["payloads"]
@@ -91,17 +89,38 @@ def grab_position(flight_id):
         telemetry_list = list(telemetry)
         if len(telemetry_list)==0:
             continue
-        flight_telemetry.append(dict())
-        #for rowid in telemetry_list:
-        #    print rowid["doc"]["data"]
-        last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["sentence_id"])[-1]
-        flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
-        flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
-        flight_telemetry[i]["altitude"] = last_string["doc"]["data"]["altitude"];
-        flight_telemetry[i]["time"] = last_string["doc"]["data"]["time"];
-        flight_telemetry[i]["sentence_id"] = last_string["doc"]["data"]["sentence_id"];
-        flight_telemetry[i]["payload"] = last_string["doc"]["data"]["payload"];
-        i=i+1
+        last_string = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["_parsed"]["time_parsed"])[-1]
+        if '_fix_invalid' not in last_string["doc"]["data"]:
+            flight_telemetry.append(dict())
+            flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
+            flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
+            flight_telemetry[i]["altitude"] = last_string["doc"]["data"]["altitude"];
+            flight_telemetry[i]["time"] = last_string["doc"]["data"]["time"];
+            flight_telemetry[i]["sentence_id"] = last_string["doc"]["data"]["sentence_id"];
+            flight_telemetry[i]["payload"] = last_string["doc"]["data"]["payload"];
+            i=i+1
+        else:
+            # Fix invalid so grab 100 and look
+            print "Last position is invalid, grabbing last 200 strings to look for valid one.."
+            telemetry_json = urlopen('http://habitat.habhub.org/habitat/_design/payload_telemetry/_view/flight_payload_time?startkey=["' + flight_id + '","' + payload_id + '",[]]&endkey=["' + flight_id + '","' + payload_id + '"]&include_docs=True&descending=True&limit=200')
+            telemetry = load(telemetry_json)['rows']
+            telemetry_list = list(telemetry)
+            if len(telemetry_list)==0:
+                continue
+            strings = sorted(telemetry_list, key=lambda x: x["doc"]["data"]["_parsed"]["time_parsed"], reverse=True)
+            fix_invalid = True
+            for last_string in strings:
+                if '_fix_invalid' in last_string["doc"]["data"]:
+                    continue
+                flight_telemetry.append(dict())
+                flight_telemetry[i]["latitude"] = last_string["doc"]["data"]["latitude"];
+                flight_telemetry[i]["longitude"] = last_string["doc"]["data"]["longitude"];
+                flight_telemetry[i]["altitude"] = last_string["doc"]["data"]["altitude"];
+                flight_telemetry[i]["time"] = last_string["doc"]["data"]["time"];
+                flight_telemetry[i]["sentence_id"] = last_string["doc"]["data"]["sentence_id"];
+                flight_telemetry[i]["payload"] = last_string["doc"]["data"]["payload"];
+                i=i+1
+                break
     ## Get latest timed position
     try:
         latest_telemetry = sorted(flight_telemetry, key=lambda x: x["time"])[-1]
@@ -109,7 +128,7 @@ def grab_position(flight_id):
         launch_location = grab_launch_position(flight_id)
         return {"Not launched": "1", "latitude": launch_location["latitude"], "longitude": launch_location["longitude"], "altitude": launch_location["altitude"]}
     if latest_telemetry["latitude"] == latest_telemetry["longitude"]:
-        return {"Error":"1","Message":"Position appears to be invalid: Looks like 0,0,0"}
+        return {"Error":"1","Message":"No Valid Position Telemetry Found"}
     try:
         return {"latitude": latest_telemetry["latitude"], "longitude": latest_telemetry["longitude"], "altitude": latest_telemetry["altitude"], "sentence_id": latest_telemetry["sentence_id"], "payload": latest_telemetry["payload"], "time": latest_telemetry["time"]}
     except KeyError:
@@ -182,8 +201,8 @@ try:
 
         if "Error" in position_data:
             print("ERROR: " + str(position_data["Message"]))
-            exit(1)
-        
+            sleep(10)
+            continue
         try:
             balloon = (position_data["latitude"], position_data["longitude"], position_data["altitude"])
             if "Not launched" in position_data: # No telemetry data, position is launch site
@@ -194,15 +213,10 @@ try:
             print "ERROR: Document Parsing Error:", exc_info()[0]
             print "DEBUG info:"
             print position_data
-            exit(1)
-
-        #print ("Balloon is at " + repr(balloon) + "Sentence id: " + str(d["sentence_id"]) + " at " + d["time"] + " UTC.")
+            sleep(10)
+            continue
 
         p = earthmaths.position_info(listener, balloon)
-        #p["bearing"] = wrap_bearing(p["bearing"])
-        #p["elevation"] = wrap_bearing(p["elevation"])
-        #self.check_range(p)
-        #print p
         bearing = round(p["bearing"])
         elevation = round(p["elevation"])
         distance = round(p["straight_distance"]/1000,1)
