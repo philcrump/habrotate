@@ -39,29 +39,29 @@ def google_elevation(lat, lon):
 	return round(load(elevation_json)['results'][0]['elevation'])
 
 def grab_flights():
-	i=0
-	flights_string=''
-	flights_op = []
-	try:
-		flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())+(24*3600)) + ']&include_docs=True&descending=True&limit=18')
-	except:
-		print "ERROR: Habitat HTTP Connection Error: ", exc_info()[0]
-		exit(1)
-	flights = load(flights_json)['rows']
-	for flight in flights:
-		if(flight['doc']['type']=="flight"):
-			flights_op.append(dict())
-			flights_op[i]["name"] = flight["doc"]["name"]
-			flights_op[i]["id"] = flight["doc"]["_id"]
-			flights_op[i]["time"] = mktime(parser.parse(flight["doc"]["launch"]["time"]).timetuple())
-			i=i+1
-			#flights_string += "{0},{2},{1};".format(flight["doc"]["_id"], flight["doc"]["launch"]["time"], flight["doc"]["name"])
-	#return flights_string
-	return sorted(flights_op, key=itemgetter('time'), reverse=True)
+    i=0
+    flights_string=''
+    flights_op = []
+    try:
+        flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/end_start_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True')
+    except:
+        print "ERROR: Habitat HTTP Connection Error: ", exc_info()[0]
+        exit(1)
+    flights = load(flights_json)['rows']
+    for flight in flights:
+        if(flight['doc']['type']=="flight"):
+            flights_op.append(dict())
+            flights_op[i]["name"] = flight["doc"]["name"]
+            flights_op[i]["id"] = flight["doc"]["_id"]
+            flights_op[i]["time"] = mktime(parser.parse(flight["doc"]["launch"]["time"]).timetuple())
+            i=i+1
+            #flights_string += "{0},{2},{1};".format(flight["doc"]["_id"], flight["doc"]["launch"]["time"], flight["doc"]["name"])
+    #return flights_string
+    return sorted(flights_op, key=itemgetter('time'), reverse=True)
 	
 def grab_launch_position(flight_id):
 	## Get a list of the payloads in the flight
-	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True&descending=True&limit=18')
+	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/end_start_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True')
 	flights = load(flights_json)['rows']
 	#print list(flights)
 	for flight in flights:
@@ -75,7 +75,7 @@ def grab_launch_position(flight_id):
 	
 def grab_position(flight_id):
 	## Get a list of the payloads in the flight
-	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/launch_time_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True&descending=True&limit=18')
+	flights_json = urlopen('http://habitat.habhub.org/habitat/_design/flight/_view/end_start_including_payloads?startkey=[' + str(int(time())) + ']&include_docs=True')
 	flights = load(flights_json)['rows']
 	#print list(flights)
 	for flight in flights:
